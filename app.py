@@ -7,7 +7,7 @@ from GenerateSerialNumbers import generate_serial_number
 # Initialize Firebase app
 def initialize_firebase():
     try:
-        cred = credentials.Certificate('D:\\College Work\\ProjectWork\\Water-Level-Checker\\credentials.json')
+        cred = credentials.Certificate('credentials.json')
         firebase_admin.initialize_app(cred, {'databaseURL' : 'https://water-level-checker-933ca-default-rtdb.asia-southeast1.firebasedatabase.app'})
         print("Firebase initialization successful")
     except Exception as e:
