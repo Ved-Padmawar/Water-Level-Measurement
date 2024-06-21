@@ -7,11 +7,11 @@ import subprocess
 cred = credentials.Certificate('path/to/serviceAccountKey.json')
 
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://your-database-url.firebaseio.com/'
+    'databaseURL': 'https://water-level-checker-933ca-default-rtdb.asia-southeast1.firebasedatabase.app/Data'
 })
 
 def check_serial_number(serial_number):
-    ref = db.reference('serial-numbers')
+    ref = db.reference('email')
 
     if ref.child(serial_number).get() is not None:
         return True
