@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaVista Pro - Device Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #00a8e8;
+            --secondary-color: #0077be;
+            --accent-color: #7fe7dc;
+            --background-color: #011627;
+            --text-color: #e6f1ff;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        nav {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .user-name {
+            margin-right: 15px;
+        }
+
+        .user-dp {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .user-dp img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--card-bg);
+            border-radius: 5px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 10px 0;
+            min-width: 150px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 10px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-menu:hover .dropdown {
+            display: block;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 100px auto 0; /* Increased top margin */
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .card-icon {
+            font-size: 1.5em;
+            color: var(--accent-color);
+        }
+
+        .device-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .device-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .device-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .device-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .device-icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+            color: var(--accent-color);
+        }
+
+        .device-name {
+            font-weight: 600;
+        }
+
+        .device-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status-online {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status-offline {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .add-device-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-device-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .show-notification {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <div class="logo">AquaVista Pro</div>
+            <div class="user-menu">
+                <span class="user-name">John Doe</span>
+                <div class="user-dp">
+                    <img src="https://via.placeholder.com/150" alt="User">
+                </div>
+                <div class="dropdown">
+                    <a href="#profile">Profile</a>
+                    <a href="#settings">Settings</a>
+                    <a href="#logout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Your Devices</h2>
+                <i class="fas fa-microchip card-icon"></i>
+            </div>
+            <ul class="device-list" id="deviceList">
+                <!-- Devices will be dynamically added here -->
+            </ul>
+            <button class="add-device-btn" onclick="addDevice()">
+                <i class="fas fa-plus"></i> Add New Device
+            </button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCzF3sZRlHS43rJLcGCvmhQAJvoLw9xVnU",
+            authDomain: "water-level-checker-933ca.firebaseapp.com",
+            databaseURL: "https://water-level-checker-933ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "water-level-checker-933ca",
+            storageBucket: "water-level-checker-933ca.appspot.com",
+            messagingSenderId: "846680208993",
+            appId: "1:846680208993:web:d9ee7010ea1153e671dc20"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        function getCookie(name) {
+            let cookieArr = document.cookie.split(";");
+            for(let i = 0; i < cookieArr.length; i++) {
+                let cookiePair = cookieArr[i].split("=");
+                if(name == cookiePair[0].trim()) {
+                    return decodeURIComponent(cookiePair[1]);
+                }
+            }
+            return null;
+        }
+
+        function addDevice() {
+            var deviceName = prompt("Enter device name:");
+            var serialNumber = prompt("Enter serial number:");
+            
+            if (deviceName && serialNumber) {
+                var email = getCookie('userEmail');
+                var newDevice = {
+                    name: deviceName,
+                    serial: serialNumber,
+                    status: Math.random() > 0.5 ? 'online' : 'offline'
+                };
+                firebase.database().ref('users/' + email.replace('.', ',') + '/devices').push(newDevice)
+                    .then(() => {
+                        displayDevices();
+                        showNotification(`New device "${deviceName}" added successfully!`);
+                    })
+                    .catch((error) => {
+                        showNotification("Error adding device: " + error.message, "error");
+                    });
+            } else {
+                showNotification("Please enter valid device name and serial number.", "error");
+            }
+        }
+
+        function displayDevices() {
+            var email = getCookie('userEmail');
+            var deviceList = document.getElementById('deviceList');
+            deviceList.innerHTML = ''; // Clear existing devices
+
+            firebase.database().ref('users/' + email.replace('.', ',') + '/devices').once('value', function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                    var device = childSnapshot.val();
+                    var li = document.createElement('li');
+                    li.className = 'device-item';
+                    li.innerHTML = `
+                        <div class="device-info">
+                            <i class="fas fa-faucet device-icon"></i>
+                            <span class="device-name">${device.name}</span>
+                        </div>
+                        <span class="device-status status-${device.status}">${device.status}</span>
+                    `;
+                    li.onclick = function() {
+                        handleDeviceClick(email, device.name);
+                    };
+                    deviceList.appendChild(li);
+                });
+
+                // Animate devices on load
+                gsap.from(".device-item", {
+                    opacity: 0,
+                    y: 50,
+                    stagger: 0.2,
+                    duration: 1,
+                    ease: "power3.out"
+                });
+            });
+        }
+
+        function handleDeviceClick(email, device) {
+    fetch('http://127.0.0.1:5000/device-click', {  // Make sure the URL matches your Flask server
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: email, device: device })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        window.location.href = 'device1.html';  // Redirect to the device page
+    })
+    .catch((error) => {
+        showNotification("Error handling device click: " + error.message, "error");
+    });
+}
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.backgroundColor = type === 'success' ? 'var(--success-color)' : 'var(--danger-color)';
+            notification.classList.add('show-notification');
+
+            setTimeout(() => {
+                notification.classList.remove('show-notification');
+            }, 3000);
+        }
+
+        // Call displayDevices when the page loads
+        window.onload = displayDevices;
+    </script>
+</body>
+</html>

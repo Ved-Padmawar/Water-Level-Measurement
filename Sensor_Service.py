@@ -1,83 +1,68 @@
-import RPi.GPIO as GPIO 
-import time
-import firebase_admin
-from firebase_admin import credentials, db
+from machine import Pin, time_pulse_us
+import urequests
+import utime
 
-
-cred = credentials.Certificate('serviceAccountKey.json')
-
-firebase_admin.initialize_app(cred, {
-
-    'databaseURL': 'https://porject-iot.firebaseio.com/'
-})
-
-GPIO.setmode(GPIO.BCM)
 TRIG_PIN = 23
 ECHO_PIN = 24
 
-GPIO.setup(TRIG_PIN, GPIO.OUT)
-GPIO.setup(ECHO_PIN, GPIO.IN)
+trig = Pin(TRIG_PIN, Pin.OUT)
+echo = Pin(ECHO_PIN, Pin.IN)
 
 TANK_HEIGHT = 230
 FULL_THRESHOLD = 210
 MIN_CHANGE = 1
 
-
 def get_distance():
     """Measure the distance using ultrasonic sensor."""
-
-    GPIO.output(TRIG_PIN, True)
-    time.sleep(0.00001)
-    GPIO.output(TRIG_PIN, False)
-
-    pulse_start = time.time()
+    trig.value(1)
+    utime.sleep_us(10)
+    trig.value(0)
     
-    while GPIO.input(ECHO_PIN) == 0:
-        pulse_start = time.time()
-
-    while GPIO.input(ECHO_PIN) == 1:
-        pulse_end = time.time()
-
-    pulse_duration = pulse_end - pulse_start
-    distance = pulse_duration * 17150
-    distance = round(distance, 2)
-
-    return distance
+    pulse_duration = time_pulse_us(echo, 1, 30000)  # 30ms timeout
+    if pulse_duration < 0:
+        return None  # Timeout occurred
+    
+    distance = (pulse_duration * 0.0343) / 2
+    return round(distance, 2)
 
 def get_water_level_percentage():
     """Calculate the water level as percentage of the tank height."""
     distance = get_distance()
+    if distance is None:
+        return None
     water_level = TANK_HEIGHT - distance
     percentage = (water_level / TANK_HEIGHT) * 100
-    return round(percentage,2)
+    return round(percentage, 2)
 
-
-def update_firebase(user_id,level):
-    """Update the water level in the Firebase realtime database."""
-
-    ref = ref = db.reference(f'/users/{user_id}/water_level')
-    ref.set({
-        'timestamp': time.time(),
-        'level': level
-    })
-
+def send_data_to_server(water_level):
+    """Send water level data to backend server."""
+    url = "https://your-backend-server.com/api/water-level"
+    headers = {"Content-Type": "application/json"}
+    data = {"water_level": water_level, "timestamp": utime.time(), "serial_number": "20240621100726267381"}
+    
+    try:
+        response = urequests.post(url, json=data, headers=headers)
+        print("Data sent. Server response:", response.text)
+        response.close()
+    except Exception as e:
+        print("Failed to send data:", str(e))
 
 def main():
-    """Main loop to monitor water level and update Firebase on change."""
-    try:
-        last_level = None
-        while True:
-            current_level = get_water_level_percentage()
-            
+    """Main loop to monitor water level and send data to server on change."""
+    last_level = None
+    while True:
+        current_level = get_water_level_percentage()
+        
+        if current_level is not None:
             if last_level is None or abs(current_level - last_level) >= MIN_CHANGE:
-                user_id = "user_id"
-                update_firebase(current_level)
+                send_data_to_server(current_level)
                 last_level = current_level
 
             print("Water Level:", current_level, "%")
-            time.sleep(10) 
-    finally:
-        GPIO.cleanup() 
+        else:
+            print("Failed to read sensor")
         
+        utime.sleep(10)
+
 if __name__ == "__main__":
     main()

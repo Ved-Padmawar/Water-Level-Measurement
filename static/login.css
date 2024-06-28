@@ -1,0 +1,63 @@
+body 
+{
+    background-color: white;
+}
+
+.card 
+{
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    text-align: center;
+}
+
+.form-control 
+{
+    border: none;
+    border-bottom: 2px solid #3494E6;
+    border-radius: 0;
+    padding: 12px;
+    font-size: 16px;
+}
+
+.btn-primary 
+{
+    background-color: rgb(6, 9, 208);
+    border: none;
+    border-radius: 20px;
+    transition: background-color 0.3s ease;
+    padding: 12px 20px;
+    font-weight: bold;
+}
+
+.btn-primary:hover 
+{
+    background-color: #66d4ff;
+}
+
+.card-footer
+{
+    background: rgba(255, 255, 255, 0.9);
+    border-top: none;
+    border-radius: 0 0 20px 20px;
+    padding: 10px;
+}
+
+.card-footer a 
+{
+    color: #3494E6;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.card-footer a:hover 
+{
+    color: #EC6EAD;
+}
+
+h3 
+{
+    color: #e5e7e9;
+}
