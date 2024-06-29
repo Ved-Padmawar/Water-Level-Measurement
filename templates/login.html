@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 
@@ -245,181 +244,32 @@
             // Set the cookie to expire when the browser session ends (session-only cookie)
             document.cookie = name + "=" + (value || "") + expires + "; path=/";
         }
-    
-        $(document).ready(function() {
-            $('#loginForm').submit(function(event) {
+
+        $(document).ready(function () {
+            $('#loginForm').submit(function (event) {
                 event.preventDefault(); // Prevent default form submission
-    
+
                 var emailValue = $('#email').val();
                 setCookie('userEmail', emailValue, ''); // Set session-only cookie
-    
+
                 // Redirect to /dashboard
                 window.location.href = "/devices";
             });
         });
-            $(document).ready(function() {
-                $('#loginForm').submit(function(event) {
-                    event.preventDefault();
-                    var emailValue = $('#email').val();
-    
-                    $.ajax({
-                        type: 'POST',
-                        url: '/login', // Flask route to handle login
-                        contentType: 'application/json',
-                        data: JSON.stringify({ email: emailValue }),
-                        success: function(response) {
-                            console.log(response.message);
-                            // Redirect to home page or handle success scenario
-                            window.location.href = "/devices";
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                            // Handle error scenario
-                        }
-                    });
-                });
-            });
-            
-        </script>
-</body>
-
-=======
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #3494E6, #EC6EAD);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-        }
-
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
-            padding: 30px;
-            text-align: center;
-        }
-
-        .form-control {
-            border: none;
-            border-bottom: 2px solid #3494E6;
-            border-radius: 0;
-            padding: 12px;
-            font-size: 16px;
-        }
-
-        .btn-primary {
-            background-color: rgb(6, 9, 208);
-            border: none;
-            border-radius: 20px;
-            transition: background-color 0.3s ease;
-            padding: 12px 20px;
-            font-weight: bold;
-        }
-
-        .btn-primary:hover {
-            background-color: #66d4ff;
-        }
-
-        .card-footer {
-            background: rgba(255, 255, 255, 0.9);
-            border-top: none;
-            border-radius: 0 0 20px 20px;
-            padding: 10px;
-        }
-
-        .card-footer a {
-            color: #3494E6;
-            font-weight: bold;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .card-footer a:hover {
-            color: #EC6EAD;
-        }
-
-        h3 {
-            color: #e5e7e9;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card mt-5">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="text-center">Login</h3>
-                    </div>
-                    <div class="card-body">
-                        <form id="loginForm">
-                            <div class="form-group">
-                                <label for="username">Username</label>
-                                <input type="text" class="form-control" id="username" name="username"
-                                    autocomplete="username" placeholder="Enter your username" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" name="email"
-                                    autocomplete="current-email" placeholder="Enter your email" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Login</button>
-                        </form>
-                    </div>
-                    <div class="card-footer">
-                        <p class="text-center">Don't have an account? <a href="#" class="text-primary">Sign Up</a></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
         $(document).ready(function () {
             $('#loginForm').submit(function (event) {
                 event.preventDefault();
-                var usernameValue = $('#username').val();
                 var emailValue = $('#email').val();
 
                 $.ajax({
                     type: 'POST',
                     url: '/login', // Flask route to handle login
                     contentType: 'application/json',
-                    data: JSON.stringify({ username: usernameValue, email: emailValue }),
+                    data: JSON.stringify({ email: emailValue }),
                     success: function (response) {
                         console.log(response.message);
                         // Redirect to home page or handle success scenario
-                        window.location.href = "/dashboard";
+                        window.location.href = "/devices";
                     },
                     error: function (xhr, status, error) {
                         console.error('Error:', error);
@@ -428,8 +278,8 @@
                 });
             });
         });
+
     </script>
 </body>
 
->>>>>>> fb2fb7f875982eda781f2fb289b84c0352e85065
 </html>
