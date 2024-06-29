@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaVista Pro - Ultimate Water Management Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='favicon.jpg') }}">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary-color: #00a8e8;
+            --secondary-color: #0077be;
+            --accent-color: #7fe7dc;
+            --background-color: #011627;
+            --text-color: #e6f1ff;
+            --card-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        #vanta-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        nav {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(127, 231, 220, 0.5);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-name {
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-name:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 100px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+        }
+
+        .water-level-display {
+            text-align: center;
+        }
+
+        #water-level-container {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 168, 232, 0.5);
+        }
+
+        #liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to bottom, var(--accent-color), var(--primary-color));
+            transition: height 1s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        #water-level-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            animation: ripple 2s linear infinite;
+        }
+
+        @keyframes ripple {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+
+            100% {
+                width: 500px;
+                height: 500px;
+                opacity: 0;
+            }
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        #conservation-tips {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #conservation-tips li {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        #conservation-tips li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .weather-widget {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 20px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 15px;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .weather-icon {
+            font-size: 48px;
+        }
+
+        .weather-info {
+            text-align: center;
+        }
+
+        .temperature {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="vanta-background"></div>
+    <nav>
+        <div class="nav-content">
+            <div class="logo">AquaVista Pro</div>
+            <div class="user-menu">
+                <span class="user-name" id = "userName"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard">
+            <div class="card water-level-display">
+                <h2>Real-Time Water Level</h2>
+                <div id="water-level-container">
+                    <div id="liquid"></div>
+                    <div id="water-level-text"></div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Water Usage Trends</h2>
+                <div class="chart-container">
+                    <canvas id="water-usage-chart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Smart Conservation Tips</h2>
+                <ul id="conservation-tips"></ul>
+            </div>
+            <div class="card">
+                <h2>Weather Impact</h2>
+                <div class="weather-widget">
+                    <div class="weather-icon">☀</div>
+                    <div class="weather-info">
+                        <div class="temperature">28°C</div>
+                        <div>Sunny</div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card">
+                <div class="weather-widget">
+                    <div class="weather-icon">⛅</div>
+                    <div class="weather-info">
+                        <div class="temperature">68%</div>
+                        <div>Sunny</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCzF3sZRlHS43rJLcGCvmhQAJvoLw9xVnU",
+            authDomain: "water-level-checker-933ca.firebaseapp.com",
+            databaseURL: "https://water-level-checker-933ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "water-level-checker-933ca",
+            storageBucket: "water-level-checker-933ca.appspot.com",
+            messagingSenderId: "846680208993",
+            appId: "1:846680208993:web:d9ee7010ea1153e671dc20"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Get a reference to the database service
+        const database = firebase.database();
+
+
+        function convertTimestamps(timestamps) {
+            return timestamps.map(ts => {
+                let date = new Date(ts);
+                return date.toISOString().substr(11, 8); // Extracts HH:MM:SS part
+            });
+        }
+        function getCookie(name) {
+            let cookieArr = document.cookie.split(";");
+            for (let i = 0; i < cookieArr.length; i++) {
+                let cookiePair = cookieArr[i].split("=");
+                if (name == cookiePair[0].trim()) {
+                    return decodeURIComponent(cookiePair[1]);
+                }
+            }
+            return null;
+        }
+        function fetchAndDisplayUserData() {
+            const userRef = database.ref('/Data');
+            var email = getCookie('userEmail');
+            userRef.once('value')
+                .then((snapshot) => {
+                    const response = snapshot.val();
+                    console.log(response);
+                    for (const key in response) {
+                        const user = response[key];
+                        if (user.email === email) {
+                            document.getElementById("userName").innerHTML = user.name;
+                            for (const deviceId in user.devices) {
+                                const device = user.devices[deviceId];
+                                timestamps = convertTimestamps(device.timestamps);
+                                water_levels = device.water_levels;
+                                updateWaterLevel(water_levels[water_levels.length - 1]);
+                                const data = [];
+                                for (var i = 0; i < water_levels.length; i++) {
+                                    data.push({ x: timestamps[i], y: water_levels[i] });
+                                }
+                                createWaterLevelChart('water-usage-chart', data)
+                            }
+                        }
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching data:", error);
+                });
+        }
+        window.onload = fetchAndDisplayUserData;
+
+        VANTA.WAVES({
+            el: "#vanta-background",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x0077be,
+            shininess: 40.00,
+            waveHeight: 15.00,
+            waveSpeed: 0.75,
+            zoom: 0.65
+        });
+
+        // Water level animation
+        const liquid = document.getElementById('liquid');
+        const levelText = document.getElementById('water-level-text');
+        let currentLevel = 0;
+
+        function updateWaterLevel(level) {
+            gsap.to(liquid, {
+                height: `${level}%`, // Ensure this is correctly enclosed
+                duration: 1,
+                ease: "power2.out",
+                onUpdate: () => {
+                    const currentHeight = parseFloat(liquid.style.height);
+                    levelText.textContent = `${Math.round(currentHeight)}%`; // Ensure this is correctly enclosed
+                    levelText.style.color = currentHeight > 50 ? 'white' : 'black';
+                }
+            });
+
+
+            // Add ripple effect
+            const ripple = document.createElement('div');
+            ripple.classList.add('ripple');
+            liquid.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 2000);
+        }
+
+        // Chart.js water usage trend
+        // Make sure to include Chart.js and the date-fns adapter in your HTML:
+
+        function createWaterLevelChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Water Level (%)',
+                        data: data,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                parser: 'HH:mm:ss',
+                                unit: 'hour',
+                                displayFormats: {
+                                    hour: 'HH:mm:ss'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Water Level (%)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                stepSize: 10
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Assuming you have a canvas element with id 'water-level-chart'
+
+        // Dynamic conservation tips
+        const tips = [
+            "Fix leaky faucets to save up to 20 gallons per day.",
+            "Use drought-resistant plants in your garden.",
+            "Collect rainwater for watering plants.",
+            "Take shorter showers to reduce water consumption.",
+            "Use a broom instead of a hose to clean driveways."
+        ];
+
+        const tipsList = document.getElementById('conservation-tips');
+        tips.forEach(tip => {
+            const li = document.createElement('li');
+            li.textContent = tip;
+            tipsList.appendChild(li);
+        });
+
+        // Animate tips on scroll
+        gsap.from("#conservation-tips li", {
+            opacity: 0,
+            y: 50,
+            stagger: 0.2,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: "#conservation-tips",
+                start: "top 80%"
+            }
+        });
+
+
+    </script>
+</body>
+
+</html>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Add all the CSS from the previous messages here */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -113,4 +114,121 @@ button:hover {
 
 .dev {
     text-align: center;
+=======
+/* Add all the CSS from the previous messages here */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e9ecef;
+    margin: 0;
+    padding: 0;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    color: grey;
+    padding: 15px 35px; /* Adjust padding to fit content better */
+}
+
+.logo {
+    color: black;
+    font-weight: bold;
+    font-size: xx-large;
+    cursor: pointer;
+}
+
+.user-menu {
+    position: relative;
+    margin-left: auto; /* Pushes the user menu to the right */
+}
+
+.user-name {
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+}
+
+.user-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+.user-dropdown ul {
+    padding: 0;
+    margin: 0;
+}
+
+.user-dropdown ul li a {
+    display: block;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #333;
+}
+
+.user-dropdown ul li a:hover {
+    background-color: #f8f9fa;
+}
+
+.user-menu:hover .user-dropdown,
+.user-dropdown:hover {
+    display: block;
+}
+
+.container {
+    padding: 2rem;
+}
+
+.full-width-box {
+    background-color: #fff;
+    border-radius: 15px; /* Increased border-radius */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    padding: 1.5rem; /* Increased padding */
+    margin-bottom: 2rem; /* Increased margin-bottom */
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.device-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+button {
+    background-color: #28a745;
+    border-radius: 25px; /* More rounded borders */
+    border: none;
+    color: white;
+    padding: 12px 24px; /* Slightly larger padding */
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease; /* Smooth background color change on hover */
+}
+
+button:hover {
+    background-color: #218838;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Shadow on hover for depth */
+}
+
+/* Add Device Button Style */
+.add-device-btn {
+    display: block; /* Block level element */
+    width: max-content; /* Fit content width */
+    margin: auto; /* Center button horizontally */
+    margin-top: 1rem; /* Margin top for spacing */
+    font-size: 16px; /* Font size */
+}
+
+.dev {
+    text-align: center;
+>>>>>>> fb2fb7f875982eda781f2fb289b84c0352e85065
 }
